@@ -15,12 +15,12 @@ import java.io.Serializable;
 public class TitleCastId implements Serializable {
 
     @Column(name = "title_id")
-    private Integer titleId;
+    private java.util.UUID titleId;
 
     @Column(name = "cast_id")
-    private Integer castId;
+    private java.util.UUID castId;
 
-    public TitleCastId(Integer titleId, Integer castId) {
+    public TitleCastId(java.util.UUID titleId, java.util.UUID castId) {
         this.titleId = titleId;
         this.castId = castId;
     }

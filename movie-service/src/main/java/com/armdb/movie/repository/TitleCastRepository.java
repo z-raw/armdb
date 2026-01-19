@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TitleCastRepository extends JpaRepository<TitleCast, TitleCastId> {
     
-    Page<TitleCast> findByCastId(Integer castId, Pageable pageable);
+    Page<TitleCast> findByCastId(java.util.UUID castId, Pageable pageable);
 }

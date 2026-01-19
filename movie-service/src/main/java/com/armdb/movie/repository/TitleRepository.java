@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface TitleRepository extends JpaRepository<Title, Integer> {
+public interface TitleRepository extends JpaRepository<Title, java.util.UUID> {
     
     Page<Title> findByPrimaryTitleContainingIgnoreCase(String primaryTitle, Pageable pageable);
 }

@@ -26,11 +26,15 @@ services:
       - "6000:6000"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://armdb-postgres:5432/armdb
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/armdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=
+      # - SPRING_DATASOURCE_URL=jdbc:postgresql://armdb-postgres:5432/armdb
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry:8761/eureka/
     depends_on:
       - registry
-      - armdb-postgres
+      # - armdb-postgres
+    # network_mode: host
 
   gateway:
     platform: linux/amd64

@@ -32,28 +32,29 @@ public class ActorsController {
             @RequestParam(required = false) String name) {
 
         if (page_size > 1000) page_size = 1000;
-        Pageable pageable = PageRequest.of(page, page_size, Sort.by("name").ascending());
+        Pageable pageable = PageRequest.of(page, page_size);
 
         Page<Cast> casts;
         if (name != null && !name.isEmpty()) {
+            name = name.replaceAll(" ", "&");
             casts = castRepository.findByNameContainingIgnoreCase(name, pageable);
         } else {
             casts = castRepository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(casts.map(c -> new ActorDTO(c.getId(), c.getName())));
+        return ResponseEntity.ok(casts.map(c -> new ActorDTO(c.getId(), c.getName(), c.getBirthYear(), c.getDeathYear(), c.getPrimaryProfession(), c.getKnownForTitles(), c.getAge(), c.getIsAlive())));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ActorDTO> getActor(@PathVariable Integer id) {
+    public ResponseEntity<ActorDTO> getActor(@PathVariable java.util.UUID id) {
         return castRepository.findById(id)
-                .map(c -> ResponseEntity.ok(new ActorDTO(c.getId(), c.getName())))
+                .map(c -> ResponseEntity.ok(new ActorDTO(c.getId(), c.getName(), c.getBirthYear(), c.getDeathYear(), c.getPrimaryProfession(), c.getKnownForTitles(), c.getAge(), c.getIsAlive())))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/appearances")
     public ResponseEntity<Iterable<AppearanceDTO>> getAppearances(
-            @PathVariable Integer id,
+            @PathVariable java.util.UUID id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int page_size) {
         

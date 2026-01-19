@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "titles_casts")
+@Table(name = "principals_v4")
 @Data
 @NoArgsConstructor
 public class TitleCast {
@@ -15,8 +15,14 @@ public class TitleCast {
     @EmbeddedId
     private TitleCastId id;
 
-    @Column(length = 300)
-    private String character;
+    @Column(length = 20)
+    private String tconst;
+
+    @Column(length = 20)
+    private String nconst;
+
+    @Column(length = 40)
+    private String characters;
 
     @ManyToOne
     @MapsId("titleId")
@@ -33,6 +39,6 @@ public class TitleCast {
     }
     
     public String getCharacter() {
-        return character;
+        return characters;
     }
 }

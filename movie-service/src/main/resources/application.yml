@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/armdb
     username: postgres
-    password: password
+    password: 
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

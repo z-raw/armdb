@@ -40,7 +40,7 @@ public class MoviesController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovieDTO> getMovie(@PathVariable Integer id) {
+    public ResponseEntity<MovieDTO> getMovie(@PathVariable java.util.UUID id) {
         return titleRepository.findById(id)
                 .map(t -> ResponseEntity.ok(new MovieDTO(t.getId(), t.getPrimaryTitle(), t.getStartYear())))
                 .orElse(ResponseEntity.notFound().build());
