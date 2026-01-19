@@ -1,0 +1,29 @@
+server:
+  port: 6000
+
+spring:
+  application:
+   name: movie-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/armdb
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ARMDB Movie Browser</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            margin: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        input,
+        button {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ARMDB Movies</h1>
+
+    <div id="login-section">
+        <h3>Login</h3>
+        <input type="text" id="username" placeholder="Username (user1)" value="user1">
+        <input type="password" id="password" placeholder="Password (pass1)" value="pass1">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="app" style="display:none;">
+        <div class="controls">
+            <input type="text" id="search" placeholder="Search movies...">
+            <button onclick="loadMovies(0)">Search</button>
+        </div>
+        <div id="movie-list"></div>
+        <div class="pagination">
+            <button onclick="prevPage()">Prev</button>
+            <span id="page-num">0</span>
+            <button onclick="nextPage()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let token = '';
+        let page = 0;
+
+        function login() {
+            const u = document.getElementById('username').value;
+            const p = document.getElementById('password').value;
+            token = 'Basic ' + btoa(u + ':' + p);
+
+            fetch('/uaa/user', {
+                headers: { 'Authorization': token }
+            }).then(res => {
+                if (res.ok) {
+                    document.getElementById('login-section').style.display = 'none';
+                    document.getElementById('app').style.display = 'block';
+                    loadMovies(0);
+                } else {
+                    alert('Login failed');
+                }
+            });
+        }
+
+        function loadMovies(p) {
+            page = p;
+            const q = document.getElementById('search').value;
+            let url = `/movies?page=${page}&page_size=10`;
+            if (q) url += `&name=${q}`;
+
+            fetch(url, {
+                headers: { 'Authorization': token }
+            })
+                .then(res => res.json())
+                .then(data => {
+                    const list = document.getElementById('movie-list');
+                    list.innerHTML = '';
+                    document.getElementById('page-num').textContent = page;
+
+                    // data might be a Page object wrapper depending on serialization
+                    // But MovieController uses map which returns Iterable/List directly if streaming, 
+                    // Wait, Page<Title>.map(...) returns Page<MovieDTO>. 
+                    // Spring Data REST or standard serialization of Page usually includes `content` array.
+                    // But my Controller returns ResponseEntity<Iterable>.
+                    // Wait, `Page.map` returns `Page`. `ResponseEntity.ok(page)` usually serializes sending `content`, `pageable`, `totalPages` etc.
+                    // So I should expect `data.content`.
+
+                    const movies = data.content || data;
+
+                    if (Array.isArray(movies)) {
+                        movies.forEach(m => {
+                            const div = document.createElement('div');
+                            div.className = 'card';
+                            div.innerHTML = `<b>${m.title}</b> (${m.year}) [ID: ${m.id}]`;
+                            list.appendChild(div);
+                        });
+                    }
+                });
+        }
+
+        function prevPage() {
+            if (page > 0) loadMovies(page - 1);
+        }
+
+        function nextPage() {
+            loadMovies(page + 1);
+        }
+    </script>
+</body>
+
+</html>
