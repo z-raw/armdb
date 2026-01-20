@@ -26,10 +26,11 @@ public class ActorsController {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<ActorDTO>> getActors(
+    public ResponseEntity<?> getActors(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int page_size,
-            @RequestParam(required = false) String name) {
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "false") boolean extended) {
 
         if (page_size > 1000) page_size = 1000;
         Pageable pageable = PageRequest.of(page, page_size);
@@ -42,7 +43,13 @@ public class ActorsController {
             casts = castRepository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(casts.map(c -> new ActorDTO(c.getId(), c.getName(), c.getBirthYear(), c.getDeathYear(), c.getPrimaryProfession(), c.getKnownForTitles(), c.getAge(), c.getIsAlive())));
+        Page<ActorDTO> dtos = casts.map(c -> new ActorDTO(c.getId(), c.getName(), c.getBirthYear(), c.getDeathYear(), c.getPrimaryProfession(), c.getKnownForTitles(), c.getAge(), c.getIsAlive()));
+
+        if (extended) {
+            return ResponseEntity.ok(dtos);
+        } else {
+            return ResponseEntity.ok(dtos.getContent());
+        }
     }
 
     @GetMapping("/{id}")
@@ -53,21 +60,28 @@ public class ActorsController {
     }
 
     @GetMapping("/{id}/appearances")
-    public ResponseEntity<Iterable<AppearanceDTO>> getAppearances(
+    public ResponseEntity<?> getAppearances(
             @PathVariable java.util.UUID id,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int page_size) {
+            @RequestParam(defaultValue = "10") int page_size,
+            @RequestParam(defaultValue = "false") boolean extended) {
         
         if (page_size > 1000) page_size = 1000;
         Pageable pageable = PageRequest.of(page, page_size, Sort.by("title.primaryTitle").ascending()); // Ordering by movie name
 
         Page<TitleCast> appearances = titleCastRepository.findByCastId(id, pageable);
         
-        return ResponseEntity.ok(appearances.map(tc -> new AppearanceDTO(
+        Page<AppearanceDTO> dtos = appearances.map(tc -> new AppearanceDTO(
                 tc.getTitle().getId(),
                 tc.getTitle().getPrimaryTitle(),
                 tc.getCharacter(),
                 tc.getTitle().getStartYear()
-        )));
+        ));
+
+        if (extended) {
+            return ResponseEntity.ok(dtos);
+        } else {
+            return ResponseEntity.ok(dtos.getContent());
+        }
     }
 }

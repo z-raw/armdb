@@ -22,7 +22,14 @@ public class AuthFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
-        if (path.startsWith("/uaa/")) {
+        if (path.startsWith("/uaa/") || 
+            path.equals("/") || 
+            path.equals("/index.html") || 
+            path.endsWith(".js") || 
+            path.endsWith(".css") || 
+            path.endsWith(".ico") ||
+            path.endsWith(".png") ||
+            path.endsWith(".jpg")) {
             return chain.filter(exchange);
         }
 

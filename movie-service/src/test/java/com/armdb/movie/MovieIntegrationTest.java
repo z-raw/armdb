@@ -23,12 +23,29 @@ class MovieIntegrationTest {
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
 
     @Autowired
-    private MockMvc mockMvc;
+    private org.springframework.test.web.servlet.MockMvc mockMvc;
+
+    @Autowired
+    private com.armdb.movie.repository.TitleRepository titleRepository;
 
     @Test
     void shouldReturnMovies() throws Exception {
+        com.armdb.movie.entity.Title title = new com.armdb.movie.entity.Title();
+        title.setId(java.util.UUID.randomUUID());
+        title.setPrimaryTitle("Integration Movie");
+        title.setStartYear(2024);
+        title.setTconst("tt9999999");
+        titleRepository.save(title);
+
+        // Test Default (Array)
         mockMvc.perform(get("/movies"))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].title").value("Integration Movie"));
+                
+        // Test Extended (Page)
+        mockMvc.perform(get("/movies?extended=true"))
+                .andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.content[0].title").value("Integration Movie"));
     }
 
     @Test

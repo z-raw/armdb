@@ -21,10 +21,11 @@ public class MoviesController {
     }
 
     @GetMapping
-    public ResponseEntity<Iterable<MovieDTO>> getMovies(
+    public ResponseEntity<?> getMovies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int page_size,
-            @RequestParam(required = false) String name) {
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "false") boolean extended) {
 
         if (page_size > 1000) page_size = 1000;
         Pageable pageable = PageRequest.of(page, page_size, Sort.by("primaryTitle").ascending());
@@ -36,7 +37,13 @@ public class MoviesController {
             titles = titleRepository.findAll(pageable);
         }
 
-        return ResponseEntity.ok(titles.map(t -> new MovieDTO(t.getId(), t.getPrimaryTitle(), t.getStartYear())));
+        Page<MovieDTO> dtos = titles.map(t -> new MovieDTO(t.getId(), t.getPrimaryTitle(), t.getStartYear()));
+
+        if (extended) {
+            return ResponseEntity.ok(dtos);
+        } else {
+            return ResponseEntity.ok(dtos.getContent());
+        }
     }
 
     @GetMapping("/{id}")

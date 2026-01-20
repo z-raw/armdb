@@ -4,265 +4,522 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARMDB - Actor Search</title>
+    <title>ARMDB - The Ultimate Movie Database</title>
     <style>
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #34495e;
-            --accent-color: #3498db;
-            --text-color: #333;
-            --bg-color: #ecf0f1;
+            --primary: #f5c518;
+            /* IMDb Yellow */
+            --bg-dark: #121212;
+            --bg-card: #1f1f1f;
+            --text-main: #ffffff;
+            --text-secondary: #b3b3b3;
+            --accent: #5799ef;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
-        h1 {
-            color: var(--primary-color);
-            text-align: center;
+        header {
+            background-color: #000;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            background-color: var(--primary);
+            color: black;
+            font-weight: 900;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 20px;
+            text-decoration: none;
+        }
+
+        .search-bar {
+            flex-grow: 1;
+            margin: 0 20px;
+            max-width: 600px;
+            display: flex;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 8px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .user-nav button {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .user-nav button:hover {
+            opacity: 0.8;
         }
 
         .container {
             max-width: 1200px;
-            margin: 0 auto;
+            margin: 20px auto;
+            padding: 0 20px;
         }
 
-        .search-box {
-            display: flex;
-            justify-content: center;
+        .tabs {
             margin-bottom: 20px;
         }
 
-        input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-        }
-
-        button {
-            padding: 10px 20px;
-            margin-left: 10px;
-            background-color: var(--accent-color);
-            color: white;
+        .tabs button {
+            background-color: transparent;
+            color: var(--text-secondary);
             border: none;
+            padding: 10px 20px;
+            font-size: 18px;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tabs button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--bg-card);
             border-radius: 4px;
+            overflow: hidden;
+            transition: transform 0.2s;
             cursor: pointer;
-            font-size: 16px;
         }
 
-        button:hover {
-            background-color: #2980b9;
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        th,
-        td {
+        .card-content {
             padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
         }
 
-        th {
-            background-color: var(--primary-color);
-            color: white;
+        .card-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+            display: block;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
         }
 
-        tr:hover {
-            background-color: #f5f5f5;
-            cursor: pointer;
+        .card-sub {
+            color: var(--text-secondary);
+            font-size: 0.9em;
         }
 
-        .details-panel {
+        /* Modal Styles */
+        .modal {
             display: none;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 80%;
-            max-width: 800px;
-            max-height: 80vh;
-            overflow-y: auto;
-            border-radius: 8px;
-        }
-
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0;
+            z-index: 2000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 999;
+            background-color: rgba(0, 0, 0, 0.7);
         }
 
-        .close-btn {
-            float: right;
-            font-size: 24px;
-            cursor: pointer;
+        .modal-content {
+            background-color: var(--bg-card);
+            margin: 10% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+        }
+
+        .close {
             color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
         }
 
-        .error {
-            color: red;
-            text-align: center;
+        .close:hover {
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            background-color: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+        }
+
+        .btn-submit {
+            background-color: var(--primary);
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination button {
+            background-color: var(--bg-card);
+            color: white;
+            border: 1px solid #444;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        table.details-table {
+            width: 100%;
+            border-collapse: collapse;
             margin-top: 10px;
+        }
+
+        table.details-table th,
+        table.details-table td {
+            text-align: left;
+            padding: 8px;
+            border-bottom: 1px solid #444;
+        }
+
+        table.details-table th {
+            color: var(--accent);
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
-        <h1>ARMDB Actor Search</h1>
+    <header>
+        <a href="#" class="logo">ARMDB</a>
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="Search IMDb...">
+        </div>
+        <nav class="user-nav">
+            <button id="loginBtn" onclick="openLogin()">Sign In</button>
+            <button id="logoutBtn" onclick="logout()" style="display:none;">Sign Out</button>
+        </nav>
+    </header>
 
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Enter actor name...">
-            <button onclick="searchActors()">Search</button>
+    <div class="container">
+        <div class="tabs">
+            <button id="tabMovies" class="active" onclick="switchTab('movies')">Movies</button>
+            <button id="tabActors" onclick="switchTab('actors')">Actors</button>
         </div>
 
-        <div id="errorMsg" class="error"></div>
+        <div id="grid" class="grid"></div>
 
-        <table id="actorsTable">
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Birth Year</th>
-                    <th>Death Year</th>
-                    <th>Profession</th>
-                    <th>Age</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Actors will be populated here -->
-            </tbody>
-        </table>
+        <div class="pagination">
+            <button onclick="changePage(-1)" id="prevBtn">Previous</button>
+            <span id="pageInfo" style="align-self: center;">Page 1</span>
+            <button onclick="changePage(1)" id="nextBtn">Next</button>
+        </div>
     </div>
 
-    <div class="overlay" id="overlay" onclick="closeDetails()"></div>
-    <div class="details-panel" id="detailsPanel">
-        <span class="close-btn" onclick="closeDetails()">&times;</span>
-        <h2 id="actorName"></h2>
-        <h3>Movies</h3>
-        <table id="moviesTable">
-            <thead>
-                <tr>
-                    <th>Movie</th>
-                    <th>Character</th>
-                    <th>Year</th>
-                </tr>
-            </thead>
-            <tbody>
-                <!-- Appearances will be populated here -->
-            </tbody>
-        </table>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeLogin()">&times;</span>
+            <h2>Sign In</h2>
+            <div id="loginError" style="color:red; margin-bottom:10px;"></div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" id="username">
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="password">
+            </div>
+            <button class="btn-submit" onclick="login()">Sign In</button>
+        </div>
+    </div>
+
+    <!-- Details Modal -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDetails()">&times;</span>
+            <h2 id="detailsTitle"></h2>
+            <div id="detailsContent"></div>
+        </div>
     </div>
 
     <script>
-    async function searchActors() {
-        const name = document.getElementById('searchInput').value;
-        const errorDiv = document.getElementById('errorMsg');
-        errorDiv.textContent = '';
-        const tbody = document.querySelector('#actorsTable tbody');
-        tbody.innerHTML = '';
+    let currentTab = 'movies';
+    let currentPage = 0;
+    const pageSize = 20;
 
-        try {
-            const response = await fetch(`/actors?name=${encodeURIComponent(name)}`);
-            if (!response.ok) {
-                if (response.status === 429) {
-                    throw new Error("Rate limit exceeded. Please try again later.");
-                }
-                throw new Error(`Error: ${response.statusText}`);
-            }
-            const data = await response.json();
-            
-            // Handle Page<ActorDTO> structure or Iterable<ActorDTO>
-            // The controller returns Iterable<ActorDTO> wrapped in ResponseEntity
-            // But it might be PageImpl serialized
-            // Let's assume content/content or array
-            let actors = data.content || data; 
+    // --- Auth Logic ---
+    function openLogin() {
+        document.getElementById('loginModal').style.display = 'block';
+    }
 
-            actors.forEach(actor => {
-                const tr = document.createElement('tr');
-                tr.onclick = () => showDetails(actor.id, actor.name);
-                tr.innerHTML = `
-                    <td>${actor.name}</td>
-                    <td>${actor.birthYear || '-'}</td>
-                    <td>${actor.deathYear || '-'}</td>
-                    <td>${actor.primaryProfession || '-'}</td>
-                    <td>${actor.age || '-'}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        } catch (e) {
-            errorDiv.textContent = e.message;
+    function closeLogin() {
+        document.getElementById('loginModal').style.display = 'none';
+        document.getElementById('loginError').textContent = '';
+    }
+
+    function getAuthHeader() {
+        return localStorage.getItem('authHeader');
+    }
+
+    function updateNav() {
+        if (getAuthHeader()) {
+            document.getElementById('loginBtn').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'block';
+        } else {
+            document.getElementById('loginBtn').style.display = 'block';
+            document.getElementById('logoutBtn').style.display = 'none';
         }
     }
 
-    async function showDetails(id, name) {
-        document.getElementById('actorName').textContent = name;
-        const tbody = document.querySelector('#moviesTable tbody');
-        tbody.innerHTML = '<tr><td colspan="3">Loading...</td></tr>';
-        
-        document.getElementById('overlay').style.display = 'block';
-        document.getElementById('detailsPanel').style.display = 'block';
+    async function login() {
+        const user = document.getElementById('username').value;
+        const pass = document.getElementById('password').value;
+        const creds = btoa(user + ':' + pass);
+        const header = 'Basic ' + creds;
 
         try {
-            const response = await fetch(`/actors/${id}/appearances`);
-             if (!response.ok) {
-                 if (response.status === 429) {
-                    throw new Error("Rate limit exceeded.");
-                }
-                throw new Error(`Error: ${response.statusText}`);
-            }
-            const data = await response.json();
-            let appearances = data.content || data;
-
-            tbody.innerHTML = '';
-            // Sort by movie name? The backend sorts by title.primaryTitle
-            
-            appearances.forEach(app => {
-                const tr = document.createElement('tr');
-                // AppearanceDTO contains: movie_id, movie_name, character_name
-                // Backend DTO might not contain year directly, let's check
-                // AppearanceDTO(UUID movie_id, String movie_name, String character_name)
-                // Wait, requirements say "Release date (Start year)".
-                // AppearanceDTO currently doesn't have year.
-                // I need to update AppearanceDTO and ActorsController to include year.
-                
-                tr.innerHTML = `
-                    <td>${app.movie_name}</td>
-                    <td>${app.character_name || '-'}</td>
-                    <td>${app.year || '-'}</td> 
-                `;
-                tbody.appendChild(tr);
+            const res = await fetch('/uaa/user', {
+                headers: { 'Authorization': header }
             });
+            
+            if (res.ok) {
+                localStorage.setItem('authHeader', header);
+                closeLogin();
+                updateNav();
+                fetchData(); // Retry loading data
+            } else {
+                document.getElementById('loginError').textContent = 'Invalid credentials';
+            }
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="3" style="color:red">${e.message}</td></tr>`;
+            document.getElementById('loginError').textContent = 'Login failed: ' + e.message;
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('authHeader');
+        updateNav();
+        document.getElementById('grid').innerHTML = '<p style="text-align:center;">Please sign in to view content.</p>';
+        openLogin();
+    }
+
+    // --- Search & Data Logic ---
+
+    document.getElementById('searchInput').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') {
+            currentPage = 0;
+            fetchData();
+        }
+    });
+
+    function switchTab(tab) {
+        currentTab = tab;
+        currentPage = 0;
+        document.getElementById('tabMovies').className = (tab === 'movies' ? 'active' : '');
+        document.getElementById('tabActors').className = (tab === 'actors' ? 'active' : '');
+        fetchData();
+    }
+
+    function changePage(delta) {
+        currentPage += delta;
+        if (currentPage < 0) currentPage = 0;
+        fetchData();
+    }
+
+    async function fetchData() {
+        const query = document.getElementById('searchInput').value;
+        const endpoint = currentTab === 'movies' ? '/movies' : '/actors';
+        let url = `${endpoint}?page=${currentPage}&page_size=${pageSize}&extended=true`;
+        
+        if (query) {
+             url += `&name=${encodeURIComponent(query)}`;
+        }
+
+        const header = getAuthHeader();
+        if (!header) {
+            openLogin();
+            return;
+        }
+
+        try {
+            const res = await fetch(url, {
+                headers: { 'Authorization': header }
+            });
+
+            if (res.status === 401) {
+                logout();
+                return;
+            }
+            if (res.status === 429) {
+                 document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Rate limit exceeded. Wait a moment.</p>';
+                 return;
+            }
+
+            const data = await res.json();
+            // extended=true returns a Page object: { content: [], ... }
+            // extended=false (default) returns Array: []
+            // We use extended=true
+            const items = data.content || data; 
+            renderGrid(items);
+            
+            // Handle pagination state
+            document.getElementById('pageInfo').textContent = `Page ${currentPage + 1}`;
+            document.getElementById('prevBtn').disabled = (currentPage === 0);
+            document.getElementById('nextBtn').disabled = (items.length < pageSize); // Simple check
+
+        } catch (e) {
+            console.error(e);
+            document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Error loading data.</p>';
+        }
+    }
+
+    function renderGrid(items) {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        items.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.onclick = () => showDetails(item);
+            
+            let title, sub;
+            if (currentTab === 'movies') {
+                title = item.title || item.primaryTitle;
+                sub = item.year || item.startYear;
+            } else {
+                title = item.name; // ActorDTO
+                sub = item.primaryProfession; // Available in extended ActorDTO?
+            }
+
+            card.innerHTML = `
+                <div class="card-content">
+                    <span class="card-title">${title}</span>
+                    <span class="card-sub">${sub || ''}</span>
+                </div>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    async function showDetails(item) {
+        const modal = document.getElementById('detailsModal');
+        const titleEl = document.getElementById('detailsTitle');
+        const contentEl = document.getElementById('detailsContent');
+        
+        modal.style.display = 'block';
+        contentEl.innerHTML = 'Loading...';
+
+        if (currentTab === 'movies') {
+            titleEl.textContent = item.title || item.primaryTitle;
+            // Fetch validation? Or just show DTO data?
+            // Requirement 0.2: "The responses contain extra information... enable by extended=true"
+            contentEl.innerHTML = `
+                <table class="details-table">
+                    <tr><th>Year</th><td>${item.year || item.startYear}</td></tr>
+                    <tr><th>Genres</th><td>${item.genres || '-'}</td></tr>
+                    <tr><th>Adult</th><td>${item.isAdult ? 'Yes' : 'No'}</td></tr>
+                </table>
+            `;
+        } else {
+            // Actor Details
+            titleEl.textContent = item.name;
+            contentEl.innerHTML = `
+                <p><strong>Pro:</strong> ${item.primaryProfession || '-'}</p>
+                <p><strong>Age:</strong> ${item.age || '-'}</p>
+                <h3>Filmography</h3>
+                <div id="filmography">Loading...</div>
+            `;
+            
+            // Load appearances
+            const header = getAuthHeader();
+            try {
+                const res = await fetch(`/actors/${item.id}/appearances?extended=true`, {
+                     headers: { 'Authorization': header }
+                });
+                const apps = await res.json();
+                const list = apps.content || apps;
+                
+                let html = '<table class="details-table"><tr><th>Movie</th><th>Character</th><th>Year</th></tr>';
+                list.forEach(app => {
+                    html += `<tr>
+                        <td>${app.movie_name}</td>
+                        <td>${app.character_name || '-'}</td>
+                        <td>${app.year || '-'}</td>
+                    </tr>`;
+                });
+                html += '</table>';
+                document.getElementById('filmography').innerHTML = html;
+
+            } catch (e) {
+                document.getElementById('filmography').innerText = 'Failed to load movies.';
+            }
         }
     }
 
     function closeDetails() {
-        document.getElementById('overlay').style.display = 'none';
-        document.getElementById('detailsPanel').style.display = 'none';
+        document.getElementById('detailsModal').style.display = 'none';
     }
+    
+    // Init
+    updateNav();
+    if (getAuthHeader()) fetchData();
+
     </script>
 
 </body>
