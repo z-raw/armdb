@@ -19,32 +19,32 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/actuator/**").permitAll()
-                .anyRequest().authenticated()
-            )
-            .httpBasic(withDefaults())
-            .csrf(csrf -> csrf.disable());
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/actuator/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .anyRequest().authenticated())
+                .httpBasic(withDefaults())
+                .csrf(csrf -> csrf.disable());
         return http.build();
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
         UserDetails user1 = User.withDefaultPasswordEncoder()
-            .username("user1")
-            .password("pass1")
-            .roles("USER")
-            .build();
+                .username("user1")
+                .password("pass1")
+                .roles("USER")
+                .build();
         UserDetails user2 = User.withDefaultPasswordEncoder()
-            .username("user2")
-            .password("pass2")
-            .roles("USER")
-            .build();
+                .username("user2")
+                .password("pass2")
+                .roles("USER")
+                .build();
         UserDetails user3 = User.withDefaultPasswordEncoder()
-            .username("user3")
-            .password("pass3")
-            .roles("USER")
-            .build();
+                .username("user3")
+                .password("pass3")
+                .roles("USER")
+                .build();
 
         return new InMemoryUserDetailsManager(user1, user2, user3);
     }

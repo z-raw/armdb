@@ -23,7 +23,7 @@ services:
     platform: linux/amd64
     build: movie-service
     ports:
-      - "6000:6000"
+      - "6001:6001"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/armdb

@@ -5,4 +5,4 @@ scrape_configs:
   - job_name: 'armdb-services'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['registry:8761', 'gateway:8080', 'auth-service:5001', 'movie-service:6000']
+      - targets: ['registry:8761', 'gateway:8080', 'auth-service:5001', 'movie-service:6001']
