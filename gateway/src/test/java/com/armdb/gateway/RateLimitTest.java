@@ -37,15 +37,6 @@ class RateLimitTest {
                     return chain.filter(exchange);
                 });
         
-        // Also need to ensure AuthFilter order doesn't break things if mocked? 
-        // MockBean replaces the bean, order might be lost if implementation doesn't have @Order on class vs method?
-        // AuthFilter has @Order on class (impl Ordered). 
-        // But MockBean might not proxy that interface method unless specified.
-        // Actually, just ensuring it calls chain.filter is enough for valid functionality.
-        // KeyResolver uses 'Principal' which AuthFilter *would* have populated if we were real.
-        // If Principal is empty, KeyResolver defaults to 'anonymous'.
-        // So this should work.
-
         for (int i = 0; i < 5; i++) {
             webClient.get().uri("/movies")
                     .exchange()

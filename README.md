@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ARMDB - Advanced Actor & Movie Database
 
 ARMDB is a comprehensive microservices-based application for exploring movies and actors. It provides a robust backend API and a modern, interactive frontend for searching and viewing detailed information about cinematic works and the people behind them.
@@ -5,6 +6,16 @@ ARMDB is a comprehensive microservices-based application for exploring movies an
 ## Architecture
 
 ARMDB is built using a Microservices Architecture to ensure scalability, flexibility, and fault isolation.
+=======
+# ArMDb 
+
+ArMDb is a microservices-based application for exploring movies and actors using the IMDb dataset limited to the last 5 years. 
+Its goal is to provide low-latency, scalable backend APIs and a simple frontend with basic searching and viewing functionalities.
+
+## Architecture
+
+Built using a Microservices Architecture to ensure scalability, flexibility, and fault isolation.
+>>>>>>> a43eb40 (doc: add README.md)
 
 ### Components
 
@@ -48,7 +59,11 @@ graph TD
 ## Design
 
 ### Why Microservices?
+<<<<<<< HEAD
 -   **Scalability**: The `movie-service` (high read traffic) can be scaled independently of the `auth-service` (lower traffic).
+=======
+-   **Scalability**: The `movie-service` (expected high read traffic) can be scaled independently of the `auth-service` (lower traffic).
+>>>>>>> a43eb40 (doc: add README.md)
 -   **Resilience**: Issues in the Auth service won't crash the Movie catalog functions (though access might be restricted).
 -   **Technology Independence**: Different services can evolve with different libraries or Java versions if needed.
 
@@ -58,34 +73,61 @@ We use Netflix Eureka for client-side load balancing and decoupling. Services re
 ### Gateway & Rate Limiting
 A central API Gateway pattern simplifies the client (single endpoint) and offloads cross-cutting concerns:
 -   **Security**: Auth is enforced at the edge.
+<<<<<<< HEAD
 -   **Rate Limiting**: Implemented using **Spring Cloud Gateway RequestRateLimiter** with Redis. This protects backend resources from being overwhelmed by a single user.
+=======
+-   **Rate Limiting**: Implemented using **Spring Cloud Gateway RequestRateLimiter** with Redis.
+>>>>>>> a43eb40 (doc: add README.md)
 
 ## Dependencies
 
 -   **Java 17 / 21**: Core language.
+<<<<<<< HEAD
 -   **Spring Boot 3.x**: Framework for microservices.
 -   **Spring Cloud Gateway**: Routing and filtering.
+=======
+-   **Spark 3.5.0**: ETL and cleansing of the IMDb dataset
+-   **Spring Boot 3.2**: For the microservices.
+-   **Spring Cloud Gateway 2023.0.**: Routing and filtering.
+>>>>>>> a43eb40 (doc: add README.md)
 -   **Spring Cloud Netflix Eureka**: Service Registry.
 -   **Spring Data JPA**: Database abstraction.
 -   **PostgreSQL Driver**: DB connectivity.
 -   **Testcontainers**: Integration testing with real containers.
+<<<<<<< HEAD
 -   **Lombok**: Reduces boilerplate code.
+=======
+>>>>>>> a43eb40 (doc: add README.md)
 -   **OpenAPI (Swagger)**: API documentation.
 
 ## How to Run
 
 ### Prerequisites
 -   Docker & Docker Compose
+<<<<<<< HEAD
 -   Java 17+ (optional, for local dev)
 -   Maven (optional, for local dev)
 
 ### Quick Start
 1.  Clone the repository.
 2.  Run the entire stack with Docker Compose:
+=======
+-   Java 17+
+-   Maven
+
+### Quick Start
+1.  Clone the repository.
+2.  Build the services and/or run the tests
+    ```bash
+    mvn clean package [-DskipTests]    
+    ```
+3.  Run the entire stack with Docker Compose:
+>>>>>>> a43eb40 (doc: add README.md)
     ```bash
     docker-compose up --build
     ```
 3.  Access the application:
+<<<<<<< HEAD
     -   **Frontend**: [http://localhost:8080](http://localhost:8080)
     -   **Swagger UI**: [http://localhost:6000/swagger-ui.html](http://localhost:6000/swagger-ui.html)
     -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
@@ -111,10 +153,16 @@ mvn test
 cd gateway
 mvn test
 ```
+=======
+    -   **Frontend/Gateway**: [http://localhost:8080](http://localhost:8080)
+    -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
+    -   **Prometheus**:       [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus)
+>>>>>>> a43eb40 (doc: add README.md)
 
 ## UI Showcase
 
 ### Home Page
+<<<<<<< HEAD
 The landing page with a modern dark-mode design.
 ![Home Page](docs/images/home.png)
 
@@ -129,3 +177,17 @@ Detailed view showing release year, genres, and more.
 ### Login
 Secure login popup for authentication.
 ![Login](docs/images/login.png)
+=======
+The landing page.
+![Home Page](docs/images/home.png)
+
+### Search Results
+Search for actors and movies.
+![Search Results](docs/images/search.png)
+
+### Movie Details
+![Movie Details](docs/images/details.png)
+
+### Appearances
+![Actors Appearances](docs/images/appearances.png)
+>>>>>>> a43eb40 (doc: add README.md)
