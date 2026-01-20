@@ -95,6 +95,10 @@ A central API Gateway pattern simplifies the client (single endpoint) and offloa
     -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
     -   **Prometheus**:       [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus)
 
+### Data
+-  The database is available at [armdb-backup.tar](https://drive.google.com/file/d/1fAnTBdH-T44LUuAw1GtQ9B7VRRBPfTyC/view?usp=sharing)
+-  To restore the db, extract the .tar and run `restore.sql`
+
 ## UI Showcase
 
 ### Home Page
