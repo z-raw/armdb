@@ -26,7 +26,7 @@ The system consists of the following core services:
     -   **Database**: Connects to the PostgreSQL database (`armdb`).
     -   **Search**: Implements full-text search for actors and keyword search for movies.
 
-4.  **Auth Service** (Port 5000)
+4.  **Auth Service** (Port 5001)
     -   **Security**: Handles user verification and provides user details for the Gateway's auth filter.
 
 ### Infrastructure
@@ -42,7 +42,7 @@ graph TD
     Gateway -->|Rate Limit Check| Redis((Redis))
     Gateway -->|Service Lookup| Registry[Eureka Registry :8761]
     Gateway -->|/movies, /actors| MovieService[Movie Service :6001]
-    Gateway -->|/uaa/user| AuthService[Auth Service :5000]
+    Gateway -->|/uaa/user| AuthService[Auth Service :5001]
     MovieService -->|Query| DB((PostgreSQL))
 ```
 
@@ -96,6 +96,11 @@ A central API Gateway pattern simplifies the client (single endpoint) and offloa
     -   **Auth Swagger**: [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html)
     -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
     -   **Prometheus**:       [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus)
+
+4. For simplicity, three users are hardcoded in the auth service: 
+    ```
+    [user1:pass1],   [user2:pass2],   [user3:pass3]
+    ```
 
 ### Data
 -  The database is available at [armdb-backup.tar](https://drive.google.com/file/d/1fAnTBdH-T44LUuAw1GtQ9B7VRRBPfTyC/view?usp=sharing)

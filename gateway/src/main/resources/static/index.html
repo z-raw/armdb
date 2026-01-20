@@ -242,6 +242,17 @@
         table.details-table th {
             color: var(--accent);
         }
+
+        #filmography {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            border: 1px solid #444;
+        }
+
+        #filmography table {
+            margin-top: 0;
+        }
     </style>
 </head>
 
@@ -301,224 +312,270 @@
     </div>
 
     <script>
-    let currentTab = 'movies';
-    let currentPage = 0;
-    const pageSize = 20;
+        let currentTab = 'movies';
+        let currentPage = 0;
+        const pageSize = 20;
 
-    // --- Auth Logic ---
-    function openLogin() {
-        document.getElementById('loginModal').style.display = 'block';
-    }
+        let currentActorId = null;
+        let currentAppearancePage = 0;
 
-    function closeLogin() {
-        document.getElementById('loginModal').style.display = 'none';
-        document.getElementById('loginError').textContent = '';
-    }
-
-    function getAuthHeader() {
-        return localStorage.getItem('authHeader');
-    }
-
-    function updateNav() {
-        if (getAuthHeader()) {
-            document.getElementById('loginBtn').style.display = 'none';
-            document.getElementById('logoutBtn').style.display = 'block';
-        } else {
-            document.getElementById('loginBtn').style.display = 'block';
-            document.getElementById('logoutBtn').style.display = 'none';
+        // --- Auth Logic ---
+        function openLogin() {
+            document.getElementById('loginModal').style.display = 'block';
         }
-    }
 
-    async function login() {
-        const user = document.getElementById('username').value;
-        const pass = document.getElementById('password').value;
-        const creds = btoa(user + ':' + pass);
-        const header = 'Basic ' + creds;
+        function closeLogin() {
+            document.getElementById('loginModal').style.display = 'none';
+            document.getElementById('loginError').textContent = '';
+        }
 
-        try {
-            const res = await fetch('/uaa/user', {
-                headers: { 'Authorization': header }
-            });
-            
-            if (res.ok) {
-                localStorage.setItem('authHeader', header);
-                closeLogin();
-                updateNav();
-                fetchData(); // Retry loading data
+        function getAuthHeader() {
+            return localStorage.getItem('authHeader');
+        }
+
+        function updateNav() {
+            if (getAuthHeader()) {
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'block';
             } else {
-                document.getElementById('loginError').textContent = 'Invalid credentials';
+                document.getElementById('loginBtn').style.display = 'block';
+                document.getElementById('logoutBtn').style.display = 'none';
             }
-        } catch (e) {
-            document.getElementById('loginError').textContent = 'Login failed: ' + e.message;
         }
-    }
 
-    function logout() {
-        localStorage.removeItem('authHeader');
-        updateNav();
-        document.getElementById('grid').innerHTML = '<p style="text-align:center;">Please sign in to view content.</p>';
-        openLogin();
-    }
+        async function login() {
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+            const creds = btoa(user + ':' + pass);
+            const header = 'Basic ' + creds;
 
-    // --- Search & Data Logic ---
+            try {
+                const res = await fetch('/uaa/user', {
+                    headers: { 'Authorization': header }
+                });
 
-    document.getElementById('searchInput').addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
+                if (res.ok) {
+                    localStorage.setItem('authHeader', header);
+                    closeLogin();
+                    updateNav();
+                    fetchData(); // Retry loading data
+                } else {
+                    document.getElementById('loginError').textContent = 'Invalid credentials';
+                }
+            } catch (e) {
+                document.getElementById('loginError').textContent = 'Login failed: ' + e.message;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('authHeader');
+            updateNav();
+            document.getElementById('grid').innerHTML = '<p style="text-align:center;">Please sign in to view content.</p>';
+            openLogin();
+        }
+
+        // --- Search & Data Logic ---
+
+        document.getElementById('searchInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                currentPage = 0;
+                fetchData();
+            }
+        });
+
+        function switchTab(tab) {
+            currentTab = tab;
             currentPage = 0;
+            document.getElementById('tabMovies').className = (tab === 'movies' ? 'active' : '');
+            document.getElementById('tabActors').className = (tab === 'actors' ? 'active' : '');
             fetchData();
         }
-    });
 
-    function switchTab(tab) {
-        currentTab = tab;
-        currentPage = 0;
-        document.getElementById('tabMovies').className = (tab === 'movies' ? 'active' : '');
-        document.getElementById('tabActors').className = (tab === 'actors' ? 'active' : '');
-        fetchData();
-    }
-
-    function changePage(delta) {
-        currentPage += delta;
-        if (currentPage < 0) currentPage = 0;
-        fetchData();
-    }
-
-    async function fetchData() {
-        const query = document.getElementById('searchInput').value;
-        const endpoint = currentTab === 'movies' ? '/movies' : '/actors';
-        let url = `${endpoint}?page=${currentPage}&page_size=${pageSize}&extended=true`;
-        
-        if (query) {
-             url += `&name=${encodeURIComponent(query)}`;
+        function changePage(delta) {
+            currentPage += delta;
+            if (currentPage < 0) currentPage = 0;
+            fetchData();
         }
 
-        const header = getAuthHeader();
-        if (!header) {
-            openLogin();
-            return;
-        }
+        async function fetchData() {
+            const query = document.getElementById('searchInput').value;
+            const endpoint = currentTab === 'movies' ? '/movies' : '/actors';
+            let url = `${endpoint}?page=${currentPage}&page_size=${pageSize}&extended=true`;
 
-        try {
-            const res = await fetch(url, {
-                headers: { 'Authorization': header }
-            });
+            if (query) {
+                url += `&name=${encodeURIComponent(query)}`;
+            }
 
-            if (res.status === 401) {
-                logout();
+            const header = getAuthHeader();
+            if (!header) {
+                openLogin();
                 return;
             }
-            if (res.status === 429) {
-                 document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Rate limit exceeded. Wait a moment.</p>';
-                 return;
+
+            try {
+                const res = await fetch(url, {
+                    headers: { 'Authorization': header }
+                });
+
+                if (res.status === 401) {
+                    logout();
+                    return;
+                }
+                if (res.status === 503) {
+                    document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Resource not available. If this is the first time you\'re running the project, please wait a while till the gateway services are discovered </p>';
+                    return;
+                }
+                if (res.status === 429) {
+                    document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">You have exceeded the rate limit of 5 requests/minute. Please wait.</p>';
+                    return;
+                }
+
+                const data = await res.json();
+                // extended=true returns a Page object: { content: [], ... }
+                // extended=false (default) returns Array: []
+                // We use extended=true
+                const items = data.content || data;
+                renderGrid(items);
+
+                // Handle pagination state
+                document.getElementById('pageInfo').textContent = `Page ${currentPage + 1}`;
+                document.getElementById('prevBtn').disabled = (currentPage === 0);
+                document.getElementById('nextBtn').disabled = (items.length < pageSize); // Simple check
+
+            } catch (e) {
+                console.error(e);
+                document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Error loading data.</p>';
             }
-
-            const data = await res.json();
-            // extended=true returns a Page object: { content: [], ... }
-            // extended=false (default) returns Array: []
-            // We use extended=true
-            const items = data.content || data; 
-            renderGrid(items);
-            
-            // Handle pagination state
-            document.getElementById('pageInfo').textContent = `Page ${currentPage + 1}`;
-            document.getElementById('prevBtn').disabled = (currentPage === 0);
-            document.getElementById('nextBtn').disabled = (items.length < pageSize); // Simple check
-
-        } catch (e) {
-            console.error(e);
-            document.getElementById('grid').innerHTML = '<p style="color:red; text-align:center;">Error loading data.</p>';
         }
-    }
 
-    function renderGrid(items) {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        items.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.onclick = () => showDetails(item);
-            
-            let title, sub;
-            if (currentTab === 'movies') {
-                title = item.title || item.primaryTitle;
-                sub = item.year || item.startYear;
-            } else {
-                title = item.name; // ActorDTO
-                sub = item.primaryProfession; // Available in extended ActorDTO?
-            }
+        function renderGrid(items) {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.onclick = () => showDetails(item);
 
-            card.innerHTML = `
+                let title, sub;
+                if (currentTab === 'movies') {
+                    title = item.title || item.primaryTitle;
+                    sub = item.year || item.startYear;
+                } else {
+                    title = item.name; // ActorDTO
+                    sub = item.primaryProfession; // Available in extended ActorDTO?
+                }
+
+                card.innerHTML = `
                 <div class="card-content">
                     <span class="card-title">${title}</span>
                     <span class="card-sub">${sub || ''}</span>
                 </div>
             `;
-            grid.appendChild(card);
-        });
-    }
+                grid.appendChild(card);
+            });
+        }
 
-    async function showDetails(item) {
-        const modal = document.getElementById('detailsModal');
-        const titleEl = document.getElementById('detailsTitle');
-        const contentEl = document.getElementById('detailsContent');
-        
-        modal.style.display = 'block';
-        contentEl.innerHTML = 'Loading...';
+        async function showDetails(item) {
+            const modal = document.getElementById('detailsModal');
+            const titleEl = document.getElementById('detailsTitle');
+            const contentEl = document.getElementById('detailsContent');
 
-        if (currentTab === 'movies') {
-            titleEl.textContent = item.title || item.primaryTitle;
-            // Fetch validation? Or just show DTO data?
-            // Requirement 0.2: "The responses contain extra information... enable by extended=true"
-            contentEl.innerHTML = `
+            modal.style.display = 'block';
+            contentEl.innerHTML = 'Loading...';
+
+            if (currentTab === 'movies') {
+                titleEl.textContent = item.title || item.primaryTitle;
+                contentEl.innerHTML = `
                 <table class="details-table">
                     <tr><th>Year</th><td>${item.year || item.startYear}</td></tr>
                     <tr><th>Genres</th><td>${item.genres || '-'}</td></tr>
                     <tr><th>Adult</th><td>${item.isAdult ? 'Yes' : 'No'}</td></tr>
                 </table>
             `;
-        } else {
-            // Actor Details
-            titleEl.textContent = item.name;
-            contentEl.innerHTML = `
+            } else {
+                // Actor Details
+                currentActorId = item.id;
+                currentAppearancePage = 0;
+
+                let age = item.age || '-';
+                if (item.birthYear && !item.deathYear) {
+                    age = 2026 - item.birthYear;
+                }
+
+                titleEl.textContent = item.name;
+                contentEl.innerHTML = `
                 <p><strong>Pro:</strong> ${item.primaryProfession || '-'}</p>
-                <p><strong>Age:</strong> ${item.age || '-'}</p>
+                <p><strong>Age:</strong> ${age} ${item.birthYear ? `(Born: ${item.birthYear})` : ''}</p>
                 <h3>Filmography</h3>
                 <div id="filmography">Loading...</div>
+                <div class="pagination" id="appearancePagination" style="display:none; margin-top:10px;">
+                    <button onclick="changeAppearancePage(-1)" id="prevAppBtn">Prev</button>
+                    <span id="appPageInfo">Page 1</span>
+                    <button onclick="changeAppearancePage(1)" id="nextAppBtn">Next</button>
+                </div>
             `;
-            
-            // Load appearances
+                fetchAppearances();
+            }
+        }
+
+        async function fetchAppearances() {
+            const filmography = document.getElementById('filmography');
+            const pagination = document.getElementById('appearancePagination');
             const header = getAuthHeader();
+
             try {
-                const res = await fetch(`/actors/${item.id}/appearances?extended=true`, {
-                     headers: { 'Authorization': header }
+                const res = await fetch(`/actors/${currentActorId}/appearances?page=${currentAppearancePage}&page_size=10&extended=true`, {
+                    headers: { 'Authorization': header }
                 });
+
+                if (res.status === 503) {
+                    filmography.innerHTML = '<p style="color:red;">Resource not available (503).</p>';
+                    return;
+                }
+
                 const apps = await res.json();
                 const list = apps.content || apps;
-                
+
+                if (list.length === 0 && currentAppearancePage === 0) {
+                    filmography.innerHTML = '<p>No appearances found.</p>';
+                    pagination.style.display = 'none';
+                    return;
+                }
+
                 let html = '<table class="details-table"><tr><th>Movie</th><th>Character</th><th>Year</th></tr>';
                 list.forEach(app => {
                     html += `<tr>
-                        <td>${app.movie_name}</td>
-                        <td>${app.character_name || '-'}</td>
-                        <td>${app.year || '-'}</td>
-                    </tr>`;
+                    <td>${app.movie_name}</td>
+                    <td>${app.character_name || '-'}</td>
+                    <td>${app.year || '-'}</td>
+                </tr>`;
                 });
                 html += '</table>';
-                document.getElementById('filmography').innerHTML = html;
+                filmography.innerHTML = html;
+
+                pagination.style.display = 'flex';
+                document.getElementById('appPageInfo').textContent = `Page ${currentAppearancePage + 1}`;
+                document.getElementById('prevAppBtn').disabled = (currentAppearancePage === 0);
+                document.getElementById('nextAppBtn').disabled = (list.length < 10);
 
             } catch (e) {
-                document.getElementById('filmography').innerText = 'Failed to load movies.';
+                filmography.innerText = 'Failed to load movies.';
             }
         }
-    }
 
-    function closeDetails() {
-        document.getElementById('detailsModal').style.display = 'none';
-    }
-    
-    // Init
-    updateNav();
-    if (getAuthHeader()) fetchData();
+        function changeAppearancePage(delta) {
+            currentAppearancePage += delta;
+            if (currentAppearancePage < 0) currentAppearancePage = 0;
+            fetchAppearances();
+        }
+
+        function closeDetails() {
+            document.getElementById('detailsModal').style.display = 'none';
+        }
+
+        // Init
+        updateNav();
+        if (getAuthHeader()) fetchData();
 
     </script>
 
