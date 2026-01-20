@@ -30,19 +30,16 @@ public class WebSecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        UserDetails user1 = User.withDefaultPasswordEncoder()
-                .username("user1")
-                .password("pass1")
+        UserDetails user1 = User.withUsername("user1")
+                .password("{noop}pass1")
                 .roles("USER")
                 .build();
-        UserDetails user2 = User.withDefaultPasswordEncoder()
-                .username("user2")
-                .password("pass2")
+        UserDetails user2 = User.withUsername("user2")
+                .password("{noop}pass2")
                 .roles("USER")
                 .build();
-        UserDetails user3 = User.withDefaultPasswordEncoder()
-                .username("user3")
-                .password("pass3")
+        UserDetails user3 = User.withUsername("user3")
+                .password("{noop}pass3")
                 .roles("USER")
                 .build();
 
