@@ -95,7 +95,9 @@ A central API Gateway pattern simplifies the client (single endpoint) and offloa
     -   **Movie Swagger**: [http://localhost:6001/swagger-ui/index.html](http://localhost:6001/swagger-ui/index.html)
     -   **Auth Swagger**: [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html)
     -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
-    -   **Prometheus**:       [http://localhost:8080/actuator/prometheus](http://localhost:8080/actuator/prometheus)
+    -   **Prometheus**:       [http://localhost:9090](http://localhost:9090)
+    -   **Grafana**:          [http://localhost:3000](http://localhost:3000) (Admin: `admin` / `admin`)
+
 
 4. For simplicity, three users are hardcoded in the auth service: 
     ```
