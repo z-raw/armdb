@@ -66,7 +66,8 @@ public class ActorsController {
         return ResponseEntity.ok(appearances.map(tc -> new AppearanceDTO(
                 tc.getTitle().getId(),
                 tc.getTitle().getPrimaryTitle(),
-                tc.getCharacter()
+                tc.getCharacter(),
+                tc.getTitle().getStartYear()
         )));
     }
 }

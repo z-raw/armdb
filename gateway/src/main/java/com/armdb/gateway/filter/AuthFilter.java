@@ -27,6 +27,7 @@ public class AuthFilter implements GlobalFilter, Ordered {
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+
         if (authHeader == null || !authHeader.startsWith("Basic ")) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
@@ -34,26 +35,20 @@ public class AuthFilter implements GlobalFilter, Ordered {
 
         return webClientBuilder.build()
                 .get()
-                .uri("http://auth-service/uaa/user")
+                .uri("lb://auth-service/user")
                 .header(HttpHeaders.AUTHORIZATION, authHeader)
                 .retrieve()
                 .toBodilessEntity()
                 .flatMap(response -> {
                     if (response.getStatusCode().is2xxSuccessful()) {
-                         // Extract username if needed for rate limiting key resolver, 
-                         // effectively populating the Principal name might be needed for KeyResolver to work correctly
-                         // For now, we assume the downstream services will re-validate or trust the gateway's validation.
-                         // However, to make KeyResolver work with Principal, we need to mutate the exchange to include the Principal.
-                         // In a reactive gateway, this is non-trivial without a proper SecurityContext.
-                         // Simplification: We just forward. The KeyResolver might need to parse header itself if Principal is null.
-                        return chain.filter(exchange);
+                         return chain.filter(exchange);
                     } else {
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     }
                 })
                 .onErrorResume(e -> {
-                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                    exchange.getResponse().setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR);
                     return exchange.getResponse().setComplete();
                 });
     }

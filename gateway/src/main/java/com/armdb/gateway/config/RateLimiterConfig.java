@@ -13,6 +13,7 @@ public class RateLimiterConfig {
 
     @Bean
     public KeyResolver userKeyResolver() {
+
         return exchange -> exchange.getPrincipal()
                 .map(Principal::getName)
                 .switchIfEmpty(Mono.defer(() -> {
@@ -23,6 +24,7 @@ public class RateLimiterConfig {
                             byte[] decoded = java.util.Base64.getDecoder().decode(base64Credentials);
                             String credentials = new String(decoded);
                             String[] parts = credentials.split(":", 2);
+                            
                             return Mono.just(parts[0]);
                         } catch (Exception e) {
                             return Mono.just("anonymous");
