@@ -11,8 +11,10 @@ services:
   auth-service:
     platform: linux/amd64
     build: auth-service
+    deploy:
+        replicas: 2
     ports:
-      - "5001:5001"
+      - "5001-5010"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://registry:8761/eureka/
