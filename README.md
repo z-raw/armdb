@@ -48,6 +48,8 @@ graph TD
 
 ## Design
 
+![ArMDb.png](ArMDb.png)
+
 ### Why Microservices?
 -   **Scalability**: The `movie-service` (expected high read traffic) can be scaled independently of the `auth-service` (lower traffic).
 -   **Resilience**: Issues in the Auth service won't crash the Movie catalog functions (though access might be restricted).
@@ -92,8 +94,8 @@ A central API Gateway pattern simplifies the client (single endpoint) and offloa
     ```
 3.  Access the application:
     -   **Frontend/Gateway**: [http://localhost:8080](http://localhost:8080)
-    -   **Movie Swagger**: [http://localhost:6001/swagger-ui/index.html](http://localhost:6001/swagger-ui/index.html)
-    -   **Auth Swagger**: [http://localhost:5001/swagger-ui/index.html](http://localhost:5001/swagger-ui/index.html)
+    -   **Gateway Swagger**: [http://localhost:8080/swagger-ui/index.html](http://localhost:6001/swagger-ui/index.html)
+    -   **Movie Swagger**: [http://localhost:6001/movies/swagger-ui/index.html](http://localhost:6001/swagger-ui/index.html)
     -   **Eureka Dashboard**: [http://localhost:8761](http://localhost:8761)
     -   **Prometheus**:       [http://localhost:9090](http://localhost:9090)
     -   **Grafana**:          [http://localhost:3000](http://localhost:3000) (Admin: `admin` / `admin`)
