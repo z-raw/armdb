@@ -21,7 +21,8 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/actuator/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers(request -> request.getRequestURI().contains("swagger")).permitAll()
+                        .requestMatchers(request -> request.getRequestURI().contains("api-docs")).permitAll()
                         .anyRequest().authenticated())
                 .httpBasic(withDefaults())
                 .csrf(csrf -> csrf.disable());

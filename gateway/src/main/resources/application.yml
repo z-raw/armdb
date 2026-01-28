@@ -39,3 +39,19 @@ management:
     web:
       exposure:
         include: prometheus, health, info, gateway
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - name: gateway-service
+        url: /v3/api-docs
+      - name: auth-service
+        url: /uaa/v3/api-docs
+      - name: movie-service
+        url: /movies/v3/api-docs
+
